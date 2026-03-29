@@ -240,15 +240,7 @@ async function openBook(title) {
       params: { select: 'id,paragraph_index,content', title: `eq.${title}`, order: 'paragraph_index.asc' }
     });
 
-    // 用段落id批量取评论
-    const ids = curParas.map(p => p.id).join(',');
-    const rawComments = ids ? await (async () => {
-    const url = `${URL_}/rest/v1/book_comments?select=*&book_id=in.(${ids})&order=created_at.asc`;
-    const res = await fetch(url, {
-    headers: { apikey: KEY, Authorization: `Bearer ${KEY}` }
-    });
-    return res.json();
- })() : [];
+   curComments = {};
 
     curComments = {};
     rawComments.forEach(c => {
@@ -307,13 +299,22 @@ function renderParas() {
   }).join('');
 }
 
-function togglePara(idx) {
-  if (openIdx === idx) return; // 已展开，点文字不收起
+async function togglePara(idx) {
+  if (openIdx === idx) return;
   openIdx = idx;
-  // 更新进度
   localStorage.setItem('prog_' + curTitle, idx);
   const total = curParas.length;
   document.getElementById('progressBadge').textContent = `${idx+1} / ${total}`;
+
+  // 展开时才查这段的评论
+  if (!curComments[curParas[idx].paragraph_index]) {
+    const res = await fetch(
+      `${URL_}/rest/v1/book_comments?select=*&book_id=eq.${curParas[idx].id}&order=created_at.asc`,
+      { headers: { apikey: KEY, Authorization: `Bearer ${KEY}` } }
+    );
+    curComments[curParas[idx].paragraph_index] = await res.json();
+  }
+
   renderParas();
   setTimeout(() => {
     document.getElementById('p-' + idx)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
