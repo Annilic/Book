@@ -11,10 +11,10 @@
   --ink: #2c2c2c;
   --ink-light: #888;
   --ink-faint: #bbb;
-  --her: #e8c4ca;
-  --her-text: #6b3640;
-  --me: #c4d4e8;
-  --me-text: #2e4a66;
+  --her: #f5e9c4;
+  --her-text: #C9A84C;
+  --me: #f0dada;
+  --me-text: #721817;
   --highlight: #f5f0e8;
   --border: #e8e4dc;
   --serif: 'Noto Serif SC', 'STSong', 'SimSun', serif;
@@ -568,7 +568,7 @@ function renderBook() {
     const hasComment = cs.length > 0;
     const isOpen = openIdx === i;
     return `<div class="para${isOpen?' active':''}${hasComment?' has-comment':''}" id="para-${i}">
-      <div class="para-text" onclick="togglePara(${i})">${esc(p.content)}</div>
+      <div class="para-text" onclick="togglePara(${i})"><span style="font-size:11px;color:var(--ink-faint);margin-right:10px;user-select:none;">${i+1}</span>${esc(p.content)}</div>
       ${isOpen ? drawerHtml(p, i, cs) : '<div class="para-drawer"></div>'}
     </div>`;
   }).join('');
@@ -583,7 +583,7 @@ function drawerHtml(p, i, cs) {
   const bubblesHtml = cs.map(c => `
     <div class="bubble ${c.author}">
       ${esc(c.comment)}
-      <div class="bubble-who">${c.author==='me'?'我':'她'}</div>
+      <div class="bubble-who" style="color:${c.author==='me'?'#721817':'#C9A84C'}">${c.author==='me'?'Cerberus':'Annie'}</div>
     </div>`).join('');
   return `<div class="para-drawer">
     <div class="copy-row">
@@ -592,8 +592,8 @@ function drawerHtml(p, i, cs) {
     <div class="bubbles" id="bl-${i}">${bubblesHtml}</div>
     <div class="comment-box">
       <div class="who-row">
-        <button class="who-chip me${who==='me'?' on':''}" onclick="pickWho(event,'me',${i})">我</button>
-        <button class="who-chip her${who==='her'?' on':''}" onclick="pickWho(event,'her',${i})">她</button>
+        <button class="who-chip me${who==='me'?' on':''}" onclick="pickWho(event,'me',${i})">Cerberus</button>
+        <button class="who-chip her${who==='her'?' on':''}" onclick="pickWho(event,'her',${i})">Annie</button>
       </div>
       <div class="input-row">
         <input class="comment-input-field" id="ci-${i}" placeholder="写点什么…"
@@ -669,7 +669,7 @@ async function doComment(event, idx) {
     const bl = document.getElementById('bl-' + idx);
     const bubble = document.createElement('div');
     bubble.className = `bubble ${who}`;
-    bubble.innerHTML = `${esc(text)}<div class="bubble-who">${who==='me'?'我':'她'}</div>`;
+    bubble.innerHTML = `${esc(text)}<div class="bubble-who" style="color:${who==='me'?'#721817':'#C9A84C'}">${who==='me'?'Cerberus':'Annie'}</div>`;
     bl.appendChild(bubble);
     input.value = '';
 
@@ -793,7 +793,7 @@ function renderExportPreview() {
     const snippet = g.content.length > 40 ? g.content.slice(0,40) + '……' : g.content;
     lines.push(`【第${parseInt(pi)+1}段】"${snippet}"`);
     g.comments.forEach(c => {
-      lines.push(`${c.author==='me'?'我':'她'}：${c.comment}`);
+      lines.push(`${c.author==='me'?'Cerberus':'Annie'}：${c.comment}`);
     });
     lines.push('');
   });
