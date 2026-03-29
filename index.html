@@ -580,14 +580,16 @@ function renderBook() {
 }
 
 function drawerHtml(p, i, cs) {
-  const bubblesHtml = cs.map(c => `
-    <div class="bubble ${c.author}" id="bub-${c.id}">
+  const bubblesHtml = cs.map(c => {
+    const author = normalizeAuthor(c.author);
+    return `<div class="bubble ${author}" id="bub-${c.id}">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
         <span>${esc(c.comment)}</span>
         <button onclick="deleteComment(event,'${c.id}',${i})" style="background:none;border:none;cursor:pointer;opacity:0.3;font-size:12px;padding:0;line-height:1;flex-shrink:0" title="删除">×</button>
       </div>
-      <div class="bubble-who" style="color:${c.author==='cerberus'?'#721817':'#C9A84C'}">${c.author==='cerberus'?'Cerberus':'Annie'}</div>
-    </div>`).join('');
+      <div class="bubble-who" style="color:${author==='cerberus'?'#721817':'#C9A84C'}">${author==='cerberus'?'Cerberus':'Annie'}</div>
+    </div>`;
+  }).join('');
   return `<div class="para-drawer">
     <div class="copy-row">
       <button class="copy-line-btn" id="cpb-${i}" onclick="doCopy(event,${i})">复制这段</button>
@@ -813,7 +815,11 @@ function copyExport() {
   });
 }
 
-async function deleteComment(event, id, paraIdx) {
+function normalizeAuthor(a) {
+  if (a === 'me') return 'cerberus';
+  if (a === 'her') return 'annie';
+  return a;
+}
   event.stopPropagation();
   if (!confirm('删除这条评论？')) return;
   try {
