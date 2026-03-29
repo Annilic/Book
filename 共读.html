@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📖 和我一起读书</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', sans-serif; background: #faf9f7; color: #333; min-height: 100vh; }
+
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* ===== 书单页 ===== */
+#bookListScreen { max-width: 480px; margin: 0 auto; padding: 32px 16px 40px; }
+.page-title { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+.page-sub { font-size: 14px; color: #aaa; margin-bottom: 28px; }
+
+.book-card {
+  background: white; border-radius: 14px; padding: 16px 18px;
+  margin-bottom: 10px; cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  display: flex; justify-content: space-between; align-items: center;
+  transition: box-shadow 0.15s;
+}
+.book-card:hover { box-shadow: 0 3px 10px rgba(0,0,0,0.1); }
+.book-name { font-size: 16px; font-weight: 600; }
+.book-meta { font-size: 12px; color: #bbb; margin-top: 3px; }
+.book-arrow { font-size: 20px; color: #ddd; }
+
+.add-btn {
+  width: 100%; padding: 14px; margin-top: 10px;
+  background: #eef3f8; color: #5a7fa8; border: none; border-radius: 14px;
+  font-size: 15px; cursor: pointer; letter-spacing: 0.5px;
+  transition: background 0.15s;
+}
+.add-btn:hover { background: #dde9f4; }
+
+.upload-panel {
+  background: white; border-radius: 14px; padding: 20px;
+  margin-top: 10px; display: none;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.upload-panel input[type=text] {
+  width: 100%; padding: 10px 14px; border: 1px solid #eee;
+  border-radius: 10px; font-size: 15px; margin-bottom: 10px; outline: none;
+}
+.upload-panel input[type=text]:focus { border-color: #aac4e0; }
+.file-pick-label {
+  display: flex; align-items: center; gap: 8px;
+  width: 100%; padding: 10px 14px; background: #f7f7f7;
+  border-radius: 10px; font-size: 14px; color: #888; cursor: pointer;
+  margin-bottom: 12px; border: 1px dashed #ddd;
+}
+input[type=file] { display: none; }
+.start-btn {
+  width: 100%; padding: 12px; background: #5a7fa8; color: white;
+  border: none; border-radius: 10px; font-size: 15px; cursor: pointer;
+}
+.start-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.empty-hint { text-align: center; color: #ccc; padding: 40px 0 20px; font-size: 15px; }
+
+/* ===== 阅读页 ===== */
+#readScreen { max-width: 480px; margin: 0 auto; }
+
+.read-header {
+  padding: 14px 16px; background: white;
+  border-bottom: 1px solid #f2f2f2;
+  display: flex; align-items: center; gap: 10px;
+  position: sticky; top: 0; z-index: 20;
+}
+.back-btn { background: none; border: none; font-size: 22px; cursor: pointer; color: #888; line-height: 1; padding: 2px 4px; }
+.read-title { flex: 1; font-size: 16px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.progress-badge { font-size: 12px; color: #bbb; white-space: nowrap; }
+
+.paragraphs { padding: 14px 14px 60px; }
+
+.para-block {
+  background: white; border-radius: 14px; padding: 16px;
+  margin-bottom: 10px; cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  transition: box-shadow 0.2s;
+}
+.para-block.open { box-shadow: 0 3px 14px rgba(0,0,0,0.1); cursor: default; }
+.para-num { font-size: 11px; color: #ccc; margin-bottom: 7px; letter-spacing: 0.3px; }
+.para-text { font-size: 16px; line-height: 1.85; color: #2a2a2a; }
+
+.para-extra { display: none; margin-top: 14px; padding-top: 14px; border-top: 1px solid #f3f3f3; }
+.para-block.open .para-extra { display: block; }
+
+.copy-btn {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 5px 14px; background: #f3f3f3; border: none;
+  border-radius: 20px; font-size: 13px; color: #777; cursor: pointer;
+  margin-bottom: 14px; transition: all 0.15s;
+}
+.copy-btn.done { background: #d6ede1; color: #3a7a58; }
+
+/* 评论 */
+.comment-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.bubble {
+  padding: 8px 13px; border-radius: 14px;
+  max-width: 88%; font-size: 14px; line-height: 1.6;
+}
+.bubble.me { background: #dce8f2; color: #2e4f66; align-self: flex-start; }
+.bubble.her { background: #f5dce0; color: #6e3a42; align-self: flex-end; }
+.bubble-meta { font-size: 11px; opacity: 0.55; margin-top: 2px; }
+
+/* 评论输入 */
+.comment-input { margin-top: 4px; }
+.who-toggle { display: flex; gap: 7px; margin-bottom: 8px; }
+.who-btn {
+  flex: 1; padding: 7px; border-radius: 8px; border: 2px solid transparent;
+  font-size: 13px; cursor: pointer; background: #f5f5f5; color: #888;
+  transition: all 0.15s;
+}
+.who-btn.me.on { background: #dce8f2; border-color: #8db8d8; color: #2e4f66; }
+.who-btn.her.on { background: #f5dce0; border-color: #dca0a8; color: #6e3a42; }
+
+.input-row { display: flex; gap: 8px; }
+.input-row input {
+  flex: 1; padding: 9px 14px; border: 1px solid #eee; border-radius: 22px;
+  font-size: 14px; outline: none;
+}
+.input-row input:focus { border-color: #b0c8dc; }
+.send-btn {
+  padding: 9px 16px; background: #5a7fa8; color: white;
+  border: none; border-radius: 22px; font-size: 14px; cursor: pointer;
+  white-space: nowrap;
+}
+
+.loading { text-align: center; color: #ccc; padding: 50px; font-size: 15px; }
+</style>
+</head>
+<body>
+
+<!-- 书单页 -->
+<div id="bookListScreen" class="screen active">
+  <div class="page-title">📖 和我一起读书</div>
+  <div class="page-sub">一起慢慢读</div>
+  <div id="bookList"><div class="loading">加载中…</div></div>
+  <button class="add-btn" onclick="toggleUpload()">＋ 上传新书</button>
+  <div class="upload-panel" id="uploadPanel">
+    <input type="text" id="bookNameInput" placeholder="书名（如：我叫金三顺）">
+    <label class="file-pick-label" for="fileInput">
+      <span>📄</span><span id="fileLabelText">点这里选 txt 文件</span>
+    </label>
+    <input type="file" id="fileInput" accept=".txt" onchange="onFilePick(this)">
+    <button class="start-btn" id="startBtn" onclick="doUpload()">开始上传</button>
+  </div>
+</div>
+
+<!-- 阅读页 -->
+<div id="readScreen" class="screen">
+  <div class="read-header">
+    <button class="back-btn" onclick="goBack()">‹</button>
+    <div class="read-title" id="readTitle"></div>
+    <div class="progress-badge" id="progressBadge"></div>
+  </div>
+  <div class="paragraphs" id="paraList"></div>
+</div>
+
+<script>
+const URL_ = 'https://pgriditlwhypjbeugisd.supabase.co';
+const KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBncmlkaXRsd2h5cGpiZXVnaXNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3ODc3NjcsImV4cCI6MjA5MDM2Mzc2N30.7hWLIkQ0kLNK8hjyivPAFSbxM0p24eaLJYZuL8lyK70';
+
+// ---- API ----
+async function db(table, opts = {}) {
+  const { method = 'GET', body, params } = opts;
+  let url = `${URL_}/rest/v1/${table}`;
+  if (params) url += '?' + new URLSearchParams(params);
+  const headers = {
+    apikey: KEY, Authorization: `Bearer ${KEY}`,
+    'Content-Type': 'application/json', Prefer: 'return=representation'
+  };
+  const res = await fetch(url, { method, headers, body: body ? JSON.stringify(body) : undefined });
+  const text = await res.text();
+  if (!res.ok) throw new Error(text);
+  return text ? JSON.parse(text) : [];
+}
+
+// ---- 状态 ----
+let curTitle = '';
+let curParas = [];      // [{id, paragraph_index, content}]
+let curComments = {};   // { paragraph_index: [{author, comment}] }
+let openIdx = null;
+let who = 'me';
+
+// ---- 页面切换 ----
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goBack() {
+  openIdx = null;
+  show('bookListScreen');
+  loadBooks();
+}
+
+// ---- 书单 ----
+async function loadBooks() {
+  const el = document.getElementById('bookList');
+  el.innerHTML = '<div class="loading">加载中…</div>';
+  try {
+    const rows = await db('books', { params: { select: 'title', order: 'created_at.asc' } });
+    const seen = [], titles = [];
+    rows.forEach(r => { if (!seen.includes(r.title)) { seen.push(r.title); titles.push(r.title); } });
+
+    if (!titles.length) {
+      el.innerHTML = '<div class="empty-hint">还没有书，上传一本吧 ☁️</div>';
+      return;
+    }
+    el.innerHTML = titles.map(t => {
+      const prog = localStorage.getItem('prog_' + t) || 0;
+      return `<div class="book-card" onclick="openBook('${escAttr(t)}')">
+        <div>
+          <div class="book-name">${esc(t)}</div>
+          <div class="book-meta">上次读到第 ${parseInt(prog)+1} 段</div>
+        </div>
+        <div class="book-arrow">›</div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    el.innerHTML = '<div class="loading">加载失败，刷新试试</div>';
+    console.error(e);
+  }
+}
+
+// ---- 打开书 ----
+async function openBook(title) {
+  curTitle = title;
+  show('readScreen');
+  document.getElementById('readTitle').textContent = title;
+  document.getElementById('paraList').innerHTML = '<div class="loading">加载中…</div>';
+
+  try {
+    curParas = await db('books', {
+      params: { select: 'id,paragraph_index,content', title: `eq.${title}`, order: 'paragraph_index.asc' }
+    });
+
+    // 用段落id批量取评论
+    const ids = curParas.map(p => p.id).join(',');
+    const rawComments = ids ? await db('book_comments', {
+      params: { select: '*', book_id: `in.(${ids})`, order: 'created_at.asc' }
+    }) : [];
+
+    curComments = {};
+    rawComments.forEach(c => {
+      if (!curComments[c.paragraph_index]) curComments[c.paragraph_index] = [];
+      curComments[c.paragraph_index].push(c);
+    });
+
+    renderParas();
+    // 滚动到上次进度
+    const savedIdx = parseInt(localStorage.getItem('prog_' + title) || 0);
+    setTimeout(() => {
+      const el = document.getElementById('p-' + savedIdx);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 150);
+  } catch(e) {
+    document.getElementById('paraList').innerHTML = '<div class="loading">加载失败</div>';
+    console.error(e);
+  }
+}
+
+function renderParas() {
+  const total = curParas.length;
+  const savedIdx = parseInt(localStorage.getItem('prog_' + curTitle) || 0);
+  document.getElementById('progressBadge').textContent = `${savedIdx+1} / ${total}`;
+
+  const list = document.getElementById('paraList');
+  list.innerHTML = curParas.map((p, i) => {
+    const cs = curComments[p.paragraph_index] || [];
+    const bubblesHtml = cs.map(c => `
+      <div class="bubble ${c.author}">
+        ${esc(c.comment)}
+        <div class="bubble-meta">${c.author === 'me' ? '我' : '她'}</div>
+      </div>`).join('');
+    const isOpen = openIdx === i;
+    return `
+    <div class="para-block${isOpen ? ' open' : ''}" id="p-${i}" onclick="togglePara(${i})">
+      <div class="para-num">§ ${i+1}</div>
+      <div class="para-text">${esc(p.content)}</div>
+      <div class="para-extra">
+        <button class="copy-btn" id="cb-${i}" onclick="doCopy(event,${i})">📋 复制这段</button>
+        <div class="comment-list" id="cl-${i}">${bubblesHtml}</div>
+        <div class="comment-input">
+          <div class="who-toggle">
+            <button class="who-btn me${who==='me'?' on':''}" onclick="pickWho(event,'me',${i})">我（灰蓝）</button>
+            <button class="who-btn her${who==='her'?' on':''}" onclick="pickWho(event,'her',${i})">她（藕粉）</button>
+          </div>
+          <div class="input-row">
+            <input id="ci-${i}" placeholder="写留言…"
+              onkeydown="if(event.key==='Enter')doComment(event,${i})"
+              onclick="event.stopPropagation()">
+            <button class="send-btn" onclick="doComment(event,${i})">发</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function togglePara(idx) {
+  if (openIdx === idx) return; // 已展开，点文字不收起
+  openIdx = idx;
+  // 更新进度
+  localStorage.setItem('prog_' + curTitle, idx);
+  const total = curParas.length;
+  document.getElementById('progressBadge').textContent = `${idx+1} / ${total}`;
+  renderParas();
+  setTimeout(() => {
+    document.getElementById('p-' + idx)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 50);
+}
+
+function doCopy(event, idx) {
+  event.stopPropagation();
+  const content = curParas[idx]?.content || '';
+  navigator.clipboard.writeText(content).then(() => {
+    const btn = document.getElementById('cb-' + idx);
+    btn.textContent = '✓ 已复制';
+    btn.classList.add('done');
+    setTimeout(() => { btn.textContent = '📋 复制这段'; btn.classList.remove('done'); }, 2000);
+  });
+}
+
+function pickWho(event, val, paraIdx) {
+  event.stopPropagation();
+  who = val;
+  ['me', 'her'].forEach(w => {
+    document.querySelector(`#p-${paraIdx} .who-btn.${w}`)?.classList.toggle('on', w === val);
+  });
+}
+
+async function doComment(event, idx) {
+  event.stopPropagation();
+  const input = document.getElementById('ci-' + idx);
+  const text = input.value.trim();
+  if (!text) return;
+  const para = curParas[idx];
+  try {
+    await db('book_comments', {
+      method: 'POST',
+      body: { book_id: para.id, paragraph_index: para.paragraph_index, author: who, comment: text }
+    });
+    if (!curComments[para.paragraph_index]) curComments[para.paragraph_index] = [];
+    curComments[para.paragraph_index].push({ author: who, comment: text });
+
+    const cl = document.getElementById('cl-' + idx);
+    const bubble = document.createElement('div');
+    bubble.className = `bubble ${who}`;
+    bubble.innerHTML = `${esc(text)}<div class="bubble-meta">${who === 'me' ? '我' : '她'}</div>`;
+    cl.appendChild(bubble);
+    input.value = '';
+    bubble.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  } catch(e) {
+    alert('发送失败：' + e.message);
+  }
+}
+
+// ---- 上传 ----
+function toggleUpload() {
+  const panel = document.getElementById('uploadPanel');
+  panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+}
+
+let pickedFile = null;
+function onFilePick(input) {
+  pickedFile = input.files[0];
+  document.getElementById('fileLabelText').textContent = pickedFile ? pickedFile.name : '点这里选 txt 文件';
+}
+
+async function doUpload() {
+  const title = document.getElementById('bookNameInput').value.trim();
+  if (!title) { alert('请填写书名'); return; }
+  if (!pickedFile) { alert('请选择 txt 文件'); return; }
+
+  const btn = document.getElementById('startBtn');
+  btn.disabled = true;
+
+  try {
+    const text = await readTxt(pickedFile);
+    const paras = text.split(/\n\s*\n/).map(s => s.trim()).filter(Boolean);
+    if (!paras.length) { alert('文件好像是空的？'); return; }
+
+    // 分批写入，每批50段
+    for (let i = 0; i < paras.length; i += 50) {
+      const batch = paras.slice(i, i+50).map((content, j) => ({ title, paragraph_index: i+j, content }));
+      await db('books', { method: 'POST', body: batch });
+      btn.textContent = `上传中 ${Math.min(i+50, paras.length)} / ${paras.length}`;
+    }
+
+    alert(`✅ 上传完成！共 ${paras.length} 段`);
+    document.getElementById('uploadPanel').style.display = 'none';
+    document.getElementById('bookNameInput').value = '';
+    document.getElementById('fileLabelText').textContent = '点这里选 txt 文件';
+    pickedFile = null;
+    loadBooks();
+  } catch(e) {
+    alert('上传失败：' + e.message);
+    console.error(e);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '开始上传';
+  }
+}
+
+function readTxt(file) {
+  return new Promise((ok, fail) => {
+    const r = new FileReader();
+    r.onload = e => {
+      const text = e.target.result;
+      if (text.includes('\uFFFD')) {
+        // UTF-8 有乱码，改 GBK
+        const r2 = new FileReader();
+        r2.onload = e2 => ok(e2.target.result);
+        r2.onerror = fail;
+        r2.readAsText(file, 'GBK');
+      } else { ok(text); }
+    };
+    r.onerror = fail;
+    r.readAsText(file, 'UTF-8');
+  });
+}
+
+// ---- 工具 ----
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function escAttr(s) {
+  return String(s).replace(/'/g, "\\'");
+}
+
+// ---- 启动 ----
+loadBooks();
+</script>
+</body>
+</html>
