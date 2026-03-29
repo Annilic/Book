@@ -482,7 +482,7 @@ let curTitle = '';
 let curParas = [];
 let curComments = {};
 let openIdx = null;
-let who = 'me';
+let who = 'cerberus';
 let pageOffset = 0;
 let totalCount = 0;
 
@@ -583,7 +583,7 @@ function drawerHtml(p, i, cs) {
   const bubblesHtml = cs.map(c => `
     <div class="bubble ${c.author}">
       ${esc(c.comment)}
-      <div class="bubble-who" style="color:${c.author==='me'?'#721817':'#C9A84C'}">${c.author==='me'?'Cerberus':'Annie'}</div>
+      <div class="bubble-who" style="color:${c.author==='cerberus'?'#721817':'#C9A84C'}">${c.author==='cerberus'?'Cerberus':'Annie'}</div>
     </div>`).join('');
   return `<div class="para-drawer">
     <div class="copy-row">
@@ -592,8 +592,8 @@ function drawerHtml(p, i, cs) {
     <div class="bubbles" id="bl-${i}">${bubblesHtml}</div>
     <div class="comment-box">
       <div class="who-row">
-        <button class="who-chip me${who==='me'?' on':''}" onclick="pickWho(event,'me',${i})">Cerberus</button>
-        <button class="who-chip her${who==='her'?' on':''}" onclick="pickWho(event,'her',${i})">Annie</button>
+        <button class="who-chip me${who==='cerberus'?' on':''}" onclick="pickWho(event,'cerberus',${i})">Cerberus</button>
+        <button class="who-chip her${who==='annie'?' on':''}" onclick="pickWho(event,'annie',${i})">Annie</button>
       </div>
       <div class="input-row">
         <input class="comment-input-field" id="ci-${i}" placeholder="写点什么…"
@@ -669,7 +669,7 @@ async function doComment(event, idx) {
     const bl = document.getElementById('bl-' + idx);
     const bubble = document.createElement('div');
     bubble.className = `bubble ${who}`;
-    bubble.innerHTML = `${esc(text)}<div class="bubble-who" style="color:${who==='me'?'#721817':'#C9A84C'}">${who==='me'?'Cerberus':'Annie'}</div>`;
+    bubble.innerHTML = `${esc(text)}<div class="bubble-who" style="color:${who==='cerberus'?'#721817':'#C9A84C'}">${who==='cerberus'?'Cerberus':'Annie'}</div>`;
     bl.appendChild(bubble);
     input.value = '';
 
@@ -793,7 +793,7 @@ function renderExportPreview() {
     const snippet = g.content.length > 40 ? g.content.slice(0,40) + '……' : g.content;
     lines.push(`【第${parseInt(pi)+1}段】"${snippet}"`);
     g.comments.forEach(c => {
-      lines.push(`${c.author==='me'?'Cerberus':'Annie'}：${c.comment}`);
+      lines.push(`${c.author==='cerberus'?'Cerberus':'Annie'}：${c.comment}`);
     });
     lines.push('');
   });
