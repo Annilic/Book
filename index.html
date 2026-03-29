@@ -242,9 +242,13 @@ async function openBook(title) {
 
     // 用段落id批量取评论
     const ids = curParas.map(p => p.id).join(',');
-    const rawComments = ids ? await db('book_comments', {
-      params: { select: '*', book_id: `in.(${ids})`, order: 'created_at.asc' }
-    }) : [];
+    const rawComments = ids ? await (async () => {
+    const url = `${URL_}/rest/v1/book_comments?select=*&book_id=in.(${ids})&order=created_at.asc`;
+    const res = await fetch(url, {
+    headers: { apikey: KEY, Authorization: `Bearer ${KEY}` }
+    });
+    return res.json();
+ })() : [];
 
     curComments = {};
     rawComments.forEach(c => {
