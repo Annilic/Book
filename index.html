@@ -820,6 +820,8 @@ function normalizeAuthor(a) {
   if (a === 'her') return 'annie';
   return a;
 }
+
+async function deleteComment(event, id, paraIdx) {
   event.stopPropagation();
   if (!confirm('删除这条评论？')) return;
   try {
