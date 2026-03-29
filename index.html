@@ -3,177 +3,474 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>📖 和我一起读书</title>
+<title>和我一起读书</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
+:root {
+  --paper: #faf8f4;
+  --ink: #2c2c2c;
+  --ink-light: #888;
+  --ink-faint: #bbb;
+  --her: #e8c4ca;
+  --her-text: #6b3640;
+  --me: #c4d4e8;
+  --me-text: #2e4a66;
+  --highlight: #f5f0e8;
+  --border: #e8e4dc;
+  --serif: 'Noto Serif SC', 'STSong', 'SimSun', serif;
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', sans-serif; background: #faf9f7; color: #333; min-height: 100vh; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
+  min-height: 100vh;
+}
 
 .screen { display: none; }
 .screen.active { display: block; }
 
 /* ===== 书单页 ===== */
-#bookListScreen { max-width: 480px; margin: 0 auto; padding: 32px 16px 40px; }
-.page-title { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
-.page-sub { font-size: 14px; color: #aaa; margin-bottom: 28px; }
+#bookListScreen {
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 60px 28px 80px;
+}
 
-.book-card {
-  background: white; border-radius: 14px; padding: 16px 18px;
-  margin-bottom: 10px; cursor: pointer;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-  display: flex; justify-content: space-between; align-items: center;
-  transition: box-shadow 0.15s;
+.site-title {
+  font-size: 13px;
+  letter-spacing: 3px;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  margin-bottom: 48px;
 }
-.book-card:hover { box-shadow: 0 3px 10px rgba(0,0,0,0.1); }
-.book-name { font-size: 16px; font-weight: 600; }
-.book-meta { font-size: 12px; color: #bbb; margin-top: 3px; }
-.book-arrow { font-size: 20px; color: #ddd; }
 
-.add-btn {
-  width: 100%; padding: 14px; margin-top: 10px;
-  background: #eef3f8; color: #5a7fa8; border: none; border-radius: 14px;
-  font-size: 15px; cursor: pointer; letter-spacing: 0.5px;
-  transition: background 0.15s;
+.book-item {
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
 }
-.add-btn:hover { background: #dde9f4; }
+.book-item:first-of-type { border-top: 1px solid var(--border); }
 
-.upload-panel {
-  background: white; border-radius: 14px; padding: 20px;
-  margin-top: 10px; display: none;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+.book-item-title {
+  font-size: 18px;
+  font-weight: 500;
+  transition: color 0.2s;
 }
-.upload-panel input[type=text] {
-  width: 100%; padding: 10px 14px; border: 1px solid #eee;
-  border-radius: 10px; font-size: 15px; margin-bottom: 10px; outline: none;
+.book-item:hover .book-item-title { color: var(--ink-light); }
+.book-item-meta { font-size: 12px; color: var(--ink-faint); white-space: nowrap; }
+
+.empty-state {
+  padding: 60px 0 20px;
+  color: var(--ink-faint);
+  font-size: 15px;
+  text-align: center;
 }
-.upload-panel input[type=text]:focus { border-color: #aac4e0; }
-.file-pick-label {
-  display: flex; align-items: center; gap: 8px;
-  width: 100%; padding: 10px 14px; background: #f7f7f7;
-  border-radius: 10px; font-size: 14px; color: #888; cursor: pointer;
-  margin-bottom: 12px; border: 1px dashed #ddd;
+
+/* 上传 */
+.upload-trigger {
+  margin-top: 36px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-faint);
+  font-size: 13px;
+  cursor: pointer;
+  width: fit-content;
+  letter-spacing: 0.5px;
+  transition: color 0.2s;
 }
+.upload-trigger:hover { color: var(--ink-light); }
+.upload-trigger span { font-size: 18px; line-height: 1; }
+
+.upload-form {
+  margin-top: 20px;
+  padding: 24px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  display: none;
+}
+.upload-form input[type=text] {
+  width: 100%;
+  padding: 10px 0;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--serif);
+  font-size: 15px;
+  background: transparent;
+  outline: none;
+  margin-bottom: 16px;
+  color: var(--ink);
+}
+.upload-form input[type=text]::placeholder { color: var(--ink-faint); }
+.upload-form input[type=text]:focus { border-bottom-color: var(--ink-light); }
+
+.file-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ink-faint);
+  cursor: pointer;
+  padding: 8px 0;
+  margin-bottom: 20px;
+}
+.file-label:hover { color: var(--ink-light); }
 input[type=file] { display: none; }
-.start-btn {
-  width: 100%; padding: 12px; background: #5a7fa8; color: white;
-  border: none; border-radius: 10px; font-size: 15px; cursor: pointer;
-}
-.start-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-.empty-hint { text-align: center; color: #ccc; padding: 40px 0 20px; font-size: 15px; }
+.do-upload-btn {
+  padding: 9px 24px;
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  font-family: var(--serif);
+  font-size: 13px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: opacity 0.2s;
+}
+.do-upload-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.do-upload-btn:hover:not(:disabled) { opacity: 0.75; }
 
 /* ===== 阅读页 ===== */
-#readScreen { max-width: 480px; margin: 0 auto; }
+#readScreen { max-width: 600px; margin: 0 auto; }
 
-.read-header {
-  padding: 14px 16px; background: white;
-  border-bottom: 1px solid #f2f2f2;
-  display: flex; align-items: center; gap: 10px;
-  position: sticky; top: 0; z-index: 20;
+.read-nav {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: var(--paper);
+  padding: 16px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
 }
-.back-btn { background: none; border: none; font-size: 22px; cursor: pointer; color: #888; line-height: 1; padding: 2px 4px; }
-.read-title { flex: 1; font-size: 16px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.progress-badge { font-size: 12px; color: #bbb; white-space: nowrap; }
 
-.paragraphs { padding: 14px 14px 60px; }
-
-.para-block {
-  background: white; border-radius: 14px; padding: 16px;
-  margin-bottom: 10px; cursor: pointer;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-  transition: box-shadow 0.2s;
+.nav-back {
+  background: none;
+  border: none;
+  font-family: var(--serif);
+  font-size: 13px;
+  color: var(--ink-faint);
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.2s;
 }
-.para-block.open { box-shadow: 0 3px 14px rgba(0,0,0,0.1); cursor: default; }
-.para-num { font-size: 11px; color: #ccc; margin-bottom: 7px; letter-spacing: 0.3px; }
-.para-text { font-size: 16px; line-height: 1.85; color: #2a2a2a; }
+.nav-back:hover { color: var(--ink); }
 
-.para-extra { display: none; margin-top: 14px; padding-top: 14px; border-top: 1px solid #f3f3f3; }
-.para-block.open .para-extra { display: block; }
-
-.copy-btn {
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 5px 14px; background: #f3f3f3; border: none;
-  border-radius: 20px; font-size: 13px; color: #777; cursor: pointer;
-  margin-bottom: 14px; transition: all 0.15s;
+.nav-title {
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 1px;
 }
-.copy-btn.done { background: #d6ede1; color: #3a7a58; }
 
-/* 评论 */
-.comment-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.nav-progress {
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+/* 书页正文 */
+.book-body {
+  padding: 40px 44px 100px;
+}
+
+/* 单个段落 */
+.para {
+  position: relative;
+  margin-bottom: 0;
+}
+
+.para-text {
+  font-size: 17px;
+  line-height: 2;
+  color: var(--ink);
+  padding: 8px 0;
+  cursor: pointer;
+  transition: background 0.2s;
+  border-radius: 3px;
+  padding-left: 4px;
+  padding-right: 4px;
+  margin-left: -4px;
+  margin-right: -4px;
+}
+
+.para.has-comment .para-text { color: var(--ink); }
+.para.has-comment .para-text::after {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  background: var(--ink-faint);
+  border-radius: 50%;
+  vertical-align: super;
+  margin-left: 4px;
+  font-size: 10px;
+}
+
+.para-text:hover { background: var(--highlight); }
+.para.active .para-text { background: var(--highlight); }
+
+/* 展开区域 */
+.para-drawer {
+  display: none;
+  padding: 16px 0 20px 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 2px;
+}
+.para.active .para-drawer { display: block; }
+
+.copy-row {
+  margin-bottom: 14px;
+}
+.copy-line-btn {
+  background: none;
+  border: none;
+  font-family: var(--serif);
+  font-size: 12px;
+  color: var(--ink-faint);
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  padding: 0;
+  transition: color 0.2s;
+}
+.copy-line-btn:hover { color: var(--ink); }
+.copy-line-btn.done { color: #5a8a6a; }
+
+/* 评论气泡 */
+.bubbles { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+
 .bubble {
-  padding: 8px 13px; border-radius: 14px;
-  max-width: 88%; font-size: 14px; line-height: 1.6;
+  max-width: 80%;
+  padding: 9px 14px;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.65;
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif;
 }
-.bubble.me { background: #dce8f2; color: #2e4f66; align-self: flex-start; }
-.bubble.her { background: #f5dce0; color: #6e3a42; align-self: flex-end; }
-.bubble-meta { font-size: 11px; opacity: 0.55; margin-top: 2px; }
+.bubble.me { background: var(--me); color: var(--me-text); align-self: flex-start; }
+.bubble.her { background: var(--her); color: var(--her-text); align-self: flex-end; }
+.bubble-who { font-size: 11px; opacity: 0.5; margin-top: 3px; }
 
-/* 评论输入 */
-.comment-input { margin-top: 4px; }
-.who-toggle { display: flex; gap: 7px; margin-bottom: 8px; }
-.who-btn {
-  flex: 1; padding: 7px; border-radius: 8px; border: 2px solid transparent;
-  font-size: 13px; cursor: pointer; background: #f5f5f5; color: #888;
+/* 输入区 */
+.comment-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.who-row {
+  display: flex;
+  gap: 8px;
+}
+.who-chip {
+  padding: 4px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  font-family: var(--serif);
+  font-size: 12px;
+  color: var(--ink-faint);
+  cursor: pointer;
+  background: none;
   transition: all 0.15s;
 }
-.who-btn.me.on { background: #dce8f2; border-color: #8db8d8; color: #2e4f66; }
-.who-btn.her.on { background: #f5dce0; border-color: #dca0a8; color: #6e3a42; }
+.who-chip.me.on { background: var(--me); border-color: var(--me); color: var(--me-text); }
+.who-chip.her.on { background: var(--her); border-color: var(--her); color: var(--her-text); }
 
-.input-row { display: flex; gap: 8px; }
-.input-row input {
-  flex: 1; padding: 9px 14px; border: 1px solid #eee; border-radius: 22px;
-  font-size: 14px; outline: none;
+.input-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
-.input-row input:focus { border-color: #b0c8dc; }
+.comment-input-field {
+  flex: 1;
+  padding: 8px 0;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--serif);
+  font-size: 14px;
+  background: transparent;
+  outline: none;
+  color: var(--ink);
+}
+.comment-input-field:focus { border-bottom-color: var(--ink-light); }
+.comment-input-field::placeholder { color: var(--ink-faint); }
+
 .send-btn {
-  padding: 9px 16px; background: #5a7fa8; color: white;
-  border: none; border-radius: 22px; font-size: 14px; cursor: pointer;
+  background: none;
+  border: none;
+  font-family: var(--serif);
+  font-size: 13px;
+  color: var(--ink-faint);
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: color 0.2s;
   white-space: nowrap;
 }
+.send-btn:hover { color: var(--ink); }
 
-.loading { text-align: center; color: #ccc; padding: 50px; font-size: 15px; }
+/* 导出按钮 */
+.export-btn {
+  background: none;
+  border: none;
+  font-family: var(--serif);
+  font-size: 12px;
+  color: var(--ink-faint);
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: color 0.2s;
+}
+.export-btn:hover { color: var(--ink); }
+
+/* 导出弹窗 */
+.modal-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.25);
+  z-index: 100;
+  align-items: flex-end;
+  justify-content: center;
+}
+.modal-backdrop.open { display: flex; }
+.modal {
+  background: white;
+  border-radius: 12px 12px 0 0;
+  padding: 28px 24px 40px;
+  width: 100%;
+  max-width: 480px;
+}
+.modal-title { font-size: 16px; font-weight: 500; margin-bottom: 20px; display: flex; justify-content: space-between; }
+.modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--ink-faint); line-height: 1; }
+
+.export-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+.export-tab {
+  padding: 5px 14px; border-radius: 20px;
+  border: 1px solid var(--border);
+  font-family: var(--serif); font-size: 13px;
+  color: var(--ink-faint); cursor: pointer; background: none;
+}
+.export-tab.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+.export-preview {
+  background: var(--paper);
+  border-radius: 8px;
+  padding: 16px;
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--ink);
+  max-height: 240px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif;
+  margin-bottom: 16px;
+}
+
+.copy-all-btn {
+  width: 100%;
+  padding: 13px;
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  font-family: var(--serif);
+  font-size: 14px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  border-radius: 8px;
+}
+.copy-all-btn:hover { opacity: 0.8; }
+
+.loading-text { text-align: center; padding: 60px; color: var(--ink-faint); font-size: 15px; letter-spacing: 1px; }
+
+/* 分页加载 */
+.load-more-bar {
+  text-align: center;
+  padding: 24px;
+}
+.load-more-btn {
+  background: none;
+  border: 1px solid var(--border);
+  padding: 8px 24px;
+  font-family: var(--serif);
+  font-size: 13px;
+  color: var(--ink-faint);
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: all 0.2s;
+}
+.load-more-btn:hover { border-color: var(--ink-light); color: var(--ink); }
 </style>
 </head>
 <body>
 
 <!-- 书单页 -->
 <div id="bookListScreen" class="screen active">
-  <div class="page-title">📖 和我一起读书</div>
-  <div class="page-sub">一起慢慢读</div>
-  <div id="bookList"><div class="loading">加载中…</div></div>
-  <button class="add-btn" onclick="toggleUpload()">＋ 上传新书</button>
-  <div class="upload-panel" id="uploadPanel">
-    <input type="text" id="bookNameInput" placeholder="书名（如：我叫金三顺）">
-    <label class="file-pick-label" for="fileInput">
-      <span>📄</span><span id="fileLabelText">点这里选 txt 文件</span>
-    </label>
-    <input type="file" id="fileInput" accept=".txt" onchange="onFilePick(this)">
-    <button class="start-btn" id="startBtn" onclick="doUpload()">开始上传</button>
+  <div style="max-width:440px;margin:0 auto;padding:60px 28px 80px">
+    <div class="site-title">和我一起读书</div>
+    <div id="bookList"><div class="loading-text">…</div></div>
+    <div class="upload-trigger" onclick="toggleUpload()">
+      <span>＋</span> 上传新书
+    </div>
+    <div class="upload-form" id="uploadForm">
+      <input type="text" id="bookNameInput" placeholder="书名">
+      <label class="file-label" for="fileInput">
+        <span>📄</span><span id="fileLabelText">选择 txt 文件</span>
+      </label>
+      <input type="file" id="fileInput" accept=".txt" onchange="onFilePick(this)">
+      <button class="do-upload-btn" id="startBtn" onclick="doUpload()">上传</button>
+    </div>
   </div>
 </div>
 
 <!-- 阅读页 -->
 <div id="readScreen" class="screen">
-  <div class="read-header">
-    <button class="back-btn" onclick="goBack()">‹</button>
-    <div class="read-title" id="readTitle"></div>
-    <div class="progress-badge" id="progressBadge"></div>
+  <div class="read-nav">
+    <button class="nav-back" onclick="goBack()">← 返回</button>
+    <div class="nav-title" id="navTitle"></div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span class="nav-progress" id="navProgress"></span>
+      <button class="export-btn" onclick="openExport()">导出评论</button>
+    </div>
   </div>
-  <div class="paragraphs" id="paraList"></div>
+  <div class="book-body" id="bookBody"></div>
+</div>
+
+<!-- 导出弹窗 -->
+<div class="modal-backdrop" id="exportModal" onclick="closeExport(event)">
+  <div class="modal">
+    <div class="modal-title">
+      <span>导出评论</span>
+      <button class="modal-close" onclick="closeExport()">×</button>
+    </div>
+    <div class="export-tabs">
+      <button class="export-tab on" onclick="switchExportTab('all',this)">全部</button>
+      <button class="export-tab" onclick="switchExportTab('page',this)">当前页</button>
+    </div>
+    <div class="export-preview" id="exportPreview"></div>
+    <button class="copy-all-btn" onclick="copyExport()">复制到剪贴板</button>
+  </div>
 </div>
 
 <script>
 const URL_ = 'https://pgriditlwhypjbeugisd.supabase.co';
 const KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBncmlkaXRsd2h5cGpiZXVnaXNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3ODc3NjcsImV4cCI6MjA5MDM2Mzc2N30.7hWLIkQ0kLNK8hjyivPAFSbxM0p24eaLJYZuL8lyK70';
+const PAGE_SIZE = 30;
 
-// ---- API ----
 async function db(table, opts = {}) {
   const { method = 'GET', body, params } = opts;
   let url = `${URL_}/rest/v1/${table}`;
   if (params) url += '?' + new URLSearchParams(params);
-  const headers = {
-    apikey: KEY, Authorization: `Bearer ${KEY}`,
-    'Content-Type': 'application/json', Prefer: 'return=representation'
-  };
+  const headers = { apikey: KEY, Authorization: `Bearer ${KEY}`, 'Content-Type': 'application/json', Prefer: 'return=representation' };
   const res = await fetch(url, { method, headers, body: body ? JSON.stringify(body) : undefined });
   const text = await res.text();
   if (!res.ok) throw new Error(text);
@@ -182,155 +479,176 @@ async function db(table, opts = {}) {
 
 // ---- 状态 ----
 let curTitle = '';
-let curParas = [];      // [{id, paragraph_index, content}]
-let curComments = {};   // { paragraph_index: [{author, comment}] }
+let curParas = [];
+let curComments = {};
 let openIdx = null;
 let who = 'me';
+let pageOffset = 0;
+let totalCount = 0;
 
-// ---- 页面切换 ----
-function show(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-
-function goBack() {
-  openIdx = null;
-  show('bookListScreen');
-  loadBooks();
-}
+// ---- 工具 ----
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function show(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+function goBack(){ openIdx=null; show('bookListScreen'); loadBooks(); }
 
 // ---- 书单 ----
 async function loadBooks() {
   const el = document.getElementById('bookList');
-  el.innerHTML = '<div class="loading">加载中…</div>';
+  el.innerHTML = '<div class="loading-text">…</div>';
   try {
     const rows = await db('books', { params: { select: 'title', order: 'created_at.asc' } });
     const seen = [], titles = [];
     rows.forEach(r => { if (!seen.includes(r.title)) { seen.push(r.title); titles.push(r.title); } });
-
-    if (!titles.length) {
-      el.innerHTML = '<div class="empty-hint">还没有书，上传一本吧 ☁️</div>';
-      return;
-    }
+    if (!titles.length) { el.innerHTML = '<div class="empty-state">还没有书</div>'; return; }
     el.innerHTML = titles.map(t => {
-      const prog = localStorage.getItem('prog_' + t) || 0;
-      return `<div class="book-card" onclick="openBook('${escAttr(t)}')">
-        <div>
-          <div class="book-name">${esc(t)}</div>
-          <div class="book-meta">上次读到第 ${parseInt(prog)+1} 段</div>
-        </div>
-        <div class="book-arrow">›</div>
+      const prog = parseInt(localStorage.getItem('prog_' + t) || 0);
+      return `<div class="book-item" onclick="openBook('${escAttr(t)}')">
+        <div class="book-item-title">${esc(t)}</div>
+        <div class="book-item-meta">第 ${prog+1} 段</div>
       </div>`;
     }).join('');
-  } catch(e) {
-    el.innerHTML = '<div class="loading">加载失败，刷新试试</div>';
-    console.error(e);
-  }
+  } catch(e) { el.innerHTML = '<div class="empty-state">加载失败，刷新试试</div>'; }
 }
+
+function escAttr(s){ return String(s).replace(/'/g,"\\'"); }
 
 // ---- 打开书 ----
 async function openBook(title) {
   curTitle = title;
+  curParas = [];
+  curComments = {};
+  openIdx = null;
+  pageOffset = 0;
   show('readScreen');
-  document.getElementById('readTitle').textContent = title;
-  document.getElementById('paraList').innerHTML = '<div class="loading">加载中…</div>';
+  document.getElementById('navTitle').textContent = title;
+  document.getElementById('bookBody').innerHTML = '<div class="loading-text">…</div>';
 
+  // 获取总数
   try {
-    curParas = await db('books', {
-      params: { select: 'id,paragraph_index,content', title: `eq.${title}`, order: 'paragraph_index.asc' }
+    const countRes = await fetch(`${URL_}/rest/v1/books?select=id&title=eq.${encodeURIComponent(title)}`, {
+      headers: { apikey: KEY, Authorization: `Bearer ${KEY}`, Prefer: 'count=exact' }
     });
+    totalCount = parseInt(countRes.headers.get('content-range')?.split('/')[1] || '0');
+  } catch(e) { totalCount = 0; }
 
-   curComments = {};
+  await loadPage();
 
-    renderParas();
-    // 滚动到上次进度
-    const savedIdx = parseInt(localStorage.getItem('prog_' + title) || 0);
-    setTimeout(() => {
-      const el = document.getElementById('p-' + savedIdx);
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 150);
+  const savedIdx = parseInt(localStorage.getItem('prog_' + title) || 0);
+  setTimeout(() => {
+    const el = document.getElementById('para-' + savedIdx);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 200);
+}
+
+async function loadPage() {
+  try {
+    const newParas = await db('books', {
+      params: {
+        select: 'id,paragraph_index,content',
+        title: `eq.${curTitle}`,
+        order: 'paragraph_index.asc',
+        limit: PAGE_SIZE,
+        offset: pageOffset
+      }
+    });
+    curParas = [...curParas, ...newParas];
+    pageOffset += newParas.length;
+    renderBook();
   } catch(e) {
-    document.getElementById('paraList').innerHTML = '<div class="loading">加载失败</div>';
-    console.error(e);
+    document.getElementById('bookBody').innerHTML = '<div class="loading-text">加载失败</div>';
   }
 }
 
-function renderParas() {
-  const total = curParas.length;
+function renderBook() {
   const savedIdx = parseInt(localStorage.getItem('prog_' + curTitle) || 0);
-  document.getElementById('progressBadge').textContent = `${savedIdx+1} / ${total}`;
+  updateProgress(savedIdx);
 
-  const list = document.getElementById('paraList');
-  list.innerHTML = curParas.map((p, i) => {
+  const html = curParas.map((p, i) => {
     const cs = curComments[p.paragraph_index] || [];
-    const bubblesHtml = cs.map(c => `
-      <div class="bubble ${c.author}">
-        ${esc(c.comment)}
-        <div class="bubble-meta">${c.author === 'me' ? '我' : '她'}</div>
-      </div>`).join('');
+    const hasComment = cs.length > 0;
     const isOpen = openIdx === i;
-    return `
-    <div class="para-block${isOpen ? ' open' : ''}" id="p-${i}" onclick="togglePara(${i})">
-      <div class="para-num">§ ${i+1}</div>
-      <div class="para-text">${esc(p.content)}</div>
-      <div class="para-extra">
-        <button class="copy-btn" id="cb-${i}" onclick="doCopy(event,${i})">📋 复制这段</button>
-        <div class="comment-list" id="cl-${i}">${bubblesHtml}</div>
-        <div class="comment-input">
-          <div class="who-toggle">
-            <button class="who-btn me${who==='me'?' on':''}" onclick="pickWho(event,'me',${i})">我（灰蓝）</button>
-            <button class="who-btn her${who==='her'?' on':''}" onclick="pickWho(event,'her',${i})">她（藕粉）</button>
-          </div>
-          <div class="input-row">
-            <input id="ci-${i}" placeholder="写留言…"
-              onkeydown="if(event.key==='Enter')doComment(event,${i})"
-              onclick="event.stopPropagation()">
-            <button class="send-btn" onclick="doComment(event,${i})">发</button>
-          </div>
-        </div>
-      </div>
+    return `<div class="para${isOpen?' active':''}${hasComment?' has-comment':''}" id="para-${i}">
+      <div class="para-text" onclick="togglePara(${i})">${esc(p.content)}</div>
+      ${isOpen ? drawerHtml(p, i, cs) : '<div class="para-drawer"></div>'}
     </div>`;
   }).join('');
+
+  const hasMore = curParas.length < totalCount;
+  const moreBtn = hasMore ? `<div class="load-more-bar"><button class="load-more-btn" onclick="loadPage()">加载更多 · ${curParas.length}/${totalCount}</button></div>` : '';
+
+  document.getElementById('bookBody').innerHTML = html + moreBtn;
+}
+
+function drawerHtml(p, i, cs) {
+  const bubblesHtml = cs.map(c => `
+    <div class="bubble ${c.author}">
+      ${esc(c.comment)}
+      <div class="bubble-who">${c.author==='me'?'我':'她'}</div>
+    </div>`).join('');
+  return `<div class="para-drawer">
+    <div class="copy-row">
+      <button class="copy-line-btn" id="cpb-${i}" onclick="doCopy(event,${i})">复制这段</button>
+    </div>
+    <div class="bubbles" id="bl-${i}">${bubblesHtml}</div>
+    <div class="comment-box">
+      <div class="who-row">
+        <button class="who-chip me${who==='me'?' on':''}" onclick="pickWho(event,'me',${i})">我</button>
+        <button class="who-chip her${who==='her'?' on':''}" onclick="pickWho(event,'her',${i})">她</button>
+      </div>
+      <div class="input-row">
+        <input class="comment-input-field" id="ci-${i}" placeholder="写点什么…"
+          onkeydown="if(event.key==='Enter')doComment(event,${i})"
+          onclick="event.stopPropagation()">
+        <button class="send-btn" onclick="doComment(event,${i})">发送</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function updateProgress(idx) {
+  document.getElementById('navProgress').textContent = `${idx+1}–${Math.min(idx+PAGE_SIZE, totalCount)} / ${totalCount}`;
 }
 
 async function togglePara(idx) {
-  if (openIdx === idx) return;
+  if (openIdx === idx) { openIdx = null; renderBook(); return; }
   openIdx = idx;
-  localStorage.setItem('prog_' + curTitle, idx);
-  const total = curParas.length;
-  document.getElementById('progressBadge').textContent = `${idx+1} / ${total}`;
 
-  // 展开时才查这段的评论
-  if (!curComments[curParas[idx].paragraph_index]) {
-    const res = await fetch(
-      `${URL_}/rest/v1/book_comments?select=*&book_id=eq.${curParas[idx].id}&order=created_at.asc`,
-      { headers: { apikey: KEY, Authorization: `Bearer ${KEY}` } }
-    );
-    curComments[curParas[idx].paragraph_index] = await res.json();
+  const para = curParas[idx];
+  localStorage.setItem('prog_' + curTitle, idx);
+  updateProgress(idx);
+
+  if (!curComments[para.paragraph_index]) {
+    try {
+      const res = await fetch(
+        `${URL_}/rest/v1/book_comments?select=*&book_id=eq.${para.id}&order=created_at.asc`,
+        { headers: { apikey: KEY, Authorization: `Bearer ${KEY}` } }
+      );
+      curComments[para.paragraph_index] = await res.json();
+    } catch(e) { curComments[para.paragraph_index] = []; }
   }
 
-  renderParas();
+  renderBook();
   setTimeout(() => {
-    document.getElementById('p-' + idx)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById('para-' + idx)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, 50);
 }
 
 function doCopy(event, idx) {
   event.stopPropagation();
-  const content = curParas[idx]?.content || '';
-  navigator.clipboard.writeText(content).then(() => {
-    const btn = document.getElementById('cb-' + idx);
-    btn.textContent = '✓ 已复制';
+  navigator.clipboard.writeText(curParas[idx]?.content || '').then(() => {
+    const btn = document.getElementById('cpb-' + idx);
+    if (!btn) return;
+    btn.textContent = '已复制';
     btn.classList.add('done');
-    setTimeout(() => { btn.textContent = '📋 复制这段'; btn.classList.remove('done'); }, 2000);
+    setTimeout(() => { btn.textContent = '复制这段'; btn.classList.remove('done'); }, 2000);
   });
 }
 
 function pickWho(event, val, paraIdx) {
   event.stopPropagation();
   who = val;
-  ['me', 'her'].forEach(w => {
-    document.querySelector(`#p-${paraIdx} .who-btn.${w}`)?.classList.toggle('on', w === val);
+  ['me','her'].forEach(w => {
+    document.querySelector(`#para-${paraIdx} .who-chip.${w}`)?.classList.toggle('on', w===val);
   });
 }
 
@@ -348,62 +666,57 @@ async function doComment(event, idx) {
     if (!curComments[para.paragraph_index]) curComments[para.paragraph_index] = [];
     curComments[para.paragraph_index].push({ author: who, comment: text });
 
-    const cl = document.getElementById('cl-' + idx);
+    const bl = document.getElementById('bl-' + idx);
     const bubble = document.createElement('div');
     bubble.className = `bubble ${who}`;
-    bubble.innerHTML = `${esc(text)}<div class="bubble-meta">${who === 'me' ? '我' : '她'}</div>`;
-    cl.appendChild(bubble);
+    bubble.innerHTML = `${esc(text)}<div class="bubble-who">${who==='me'?'我':'她'}</div>`;
+    bl.appendChild(bubble);
     input.value = '';
+
+    // 更新 has-comment 标记
+    document.getElementById('para-' + idx)?.classList.add('has-comment');
     bubble.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  } catch(e) {
-    alert('发送失败：' + e.message);
-  }
+  } catch(e) { alert('发送失败'); }
 }
 
 // ---- 上传 ----
 function toggleUpload() {
-  const panel = document.getElementById('uploadPanel');
-  panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+  const f = document.getElementById('uploadForm');
+  f.style.display = f.style.display === 'block' ? 'none' : 'block';
 }
 
 let pickedFile = null;
 function onFilePick(input) {
   pickedFile = input.files[0];
-  document.getElementById('fileLabelText').textContent = pickedFile ? pickedFile.name : '点这里选 txt 文件';
+  document.getElementById('fileLabelText').textContent = pickedFile?.name || '选择 txt 文件';
 }
 
 async function doUpload() {
   const title = document.getElementById('bookNameInput').value.trim();
   if (!title) { alert('请填写书名'); return; }
   if (!pickedFile) { alert('请选择 txt 文件'); return; }
-
   const btn = document.getElementById('startBtn');
   btn.disabled = true;
-
   try {
     const text = await readTxt(pickedFile);
     const paras = text.split(/\n\s*\n/).map(s => s.trim()).filter(Boolean);
-    if (!paras.length) { alert('文件好像是空的？'); return; }
-
-    // 分批写入，每批50段
+    if (!paras.length) { alert('文件是空的？'); return; }
     for (let i = 0; i < paras.length; i += 50) {
-      const batch = paras.slice(i, i+50).map((content, j) => ({ title, paragraph_index: i+j, content }));
+      const batch = paras.slice(i,i+50).map((content,j) => ({ title, paragraph_index: i+j, content }));
       await db('books', { method: 'POST', body: batch });
-      btn.textContent = `上传中 ${Math.min(i+50, paras.length)} / ${paras.length}`;
+      btn.textContent = `${Math.min(i+50,paras.length)} / ${paras.length}`;
     }
-
-    alert(`✅ 上传完成！共 ${paras.length} 段`);
-    document.getElementById('uploadPanel').style.display = 'none';
+    alert(`上传完成，共 ${paras.length} 段`);
+    document.getElementById('uploadForm').style.display = 'none';
     document.getElementById('bookNameInput').value = '';
-    document.getElementById('fileLabelText').textContent = '点这里选 txt 文件';
+    document.getElementById('fileLabelText').textContent = '选择 txt 文件';
     pickedFile = null;
     loadBooks();
   } catch(e) {
     alert('上传失败：' + e.message);
-    console.error(e);
   } finally {
     btn.disabled = false;
-    btn.textContent = '开始上传';
+    btn.textContent = '上传';
   }
 }
 
@@ -413,27 +726,90 @@ function readTxt(file) {
     r.onload = e => {
       const text = e.target.result;
       if (text.includes('\uFFFD')) {
-        // UTF-8 有乱码，改 GBK
         const r2 = new FileReader();
         r2.onload = e2 => ok(e2.target.result);
         r2.onerror = fail;
         r2.readAsText(file, 'GBK');
-      } else { ok(text); }
+      } else ok(text);
     };
     r.onerror = fail;
     r.readAsText(file, 'UTF-8');
   });
 }
 
-// ---- 工具 ----
-function esc(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-function escAttr(s) {
-  return String(s).replace(/'/g, "\\'");
+// ---- 导出 ----
+let exportTab = 'all';
+let allExportComments = [];
+
+async function openExport() {
+  // 拉所有有评论的段落
+  try {
+    const allComments = await fetch(
+      `${URL_}/rest/v1/book_comments?select=*,books!book_id(title,paragraph_index,content)&order=created_at.asc`,
+      { headers: { apikey: KEY, Authorization: `Bearer ${KEY}` } }
+    ).then(r => r.json());
+
+    // 只过滤当前书
+    allExportComments = allComments.filter(c => c.books?.title === curTitle);
+  } catch(e) { allExportComments = []; }
+
+  exportTab = 'all';
+  document.querySelectorAll('.export-tab').forEach((t,i) => t.classList.toggle('on', i===0));
+  renderExportPreview();
+  document.getElementById('exportModal').classList.add('open');
 }
 
-// ---- 启动 ----
+function closeExport(event) {
+  if (!event || event.target === document.getElementById('exportModal')) {
+    document.getElementById('exportModal').classList.remove('open');
+  }
+}
+
+function switchExportTab(tab, el) {
+  exportTab = tab;
+  document.querySelectorAll('.export-tab').forEach(t => t.classList.remove('on'));
+  el.classList.add('on');
+  renderExportPreview();
+}
+
+function renderExportPreview() {
+  // 按段落分组
+  const grouped = {};
+  let source = allExportComments;
+  if (exportTab === 'page') {
+    const pageParaIndices = curParas.map(p => p.paragraph_index);
+    source = allExportComments.filter(c => pageParaIndices.includes(c.paragraph_index));
+  }
+
+  source.forEach(c => {
+    const pi = c.paragraph_index;
+    if (!grouped[pi]) grouped[pi] = { content: c.books?.content || '', comments: [] };
+    grouped[pi].comments.push(c);
+  });
+
+  const lines = [`《${curTitle}》评论\n`];
+  Object.keys(grouped).sort((a,b)=>a-b).forEach(pi => {
+    const g = grouped[pi];
+    const snippet = g.content.length > 40 ? g.content.slice(0,40) + '……' : g.content;
+    lines.push(`【第${parseInt(pi)+1}段】"${snippet}"`);
+    g.comments.forEach(c => {
+      lines.push(`${c.author==='me'?'我':'她'}：${c.comment}`);
+    });
+    lines.push('');
+  });
+
+  document.getElementById('exportPreview').textContent = lines.join('\n');
+}
+
+function copyExport() {
+  const text = document.getElementById('exportPreview').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.copy-all-btn');
+    btn.textContent = '已复制 ✓';
+    setTimeout(() => btn.textContent = '复制到剪贴板', 2000);
+  });
+}
+
 loadBooks();
 </script>
 </body>
