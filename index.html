@@ -258,8 +258,8 @@ input[type=file] { display: none; }
   line-height: 1.65;
   font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif;
 }
-.bubble.me { background: var(--me); color: var(--me-text); align-self: flex-start; }
-.bubble.her { background: var(--her); color: var(--her-text); align-self: flex-end; }
+.bubble.cerberus { background: var(--me); color: var(--me-text); align-self: flex-start; }
+.bubble.annie { background: var(--her); color: var(--her-text); align-self: flex-end; }
 .bubble-who { font-size: 11px; opacity: 0.5; margin-top: 3px; }
 
 /* 输入区 */
@@ -284,8 +284,8 @@ input[type=file] { display: none; }
   background: none;
   transition: all 0.15s;
 }
-.who-chip.me.on { background: var(--me); border-color: var(--me); color: var(--me-text); }
-.who-chip.her.on { background: var(--her); border-color: var(--her); color: var(--her-text); }
+.who-chip.cerberus.on { background: var(--me); border-color: var(--me); color: var(--me-text); }
+.who-chip.annie.on { background: var(--her); border-color: var(--her); color: var(--her-text); }
 
 .input-row {
   display: flex;
@@ -581,8 +581,11 @@ function renderBook() {
 
 function drawerHtml(p, i, cs) {
   const bubblesHtml = cs.map(c => `
-    <div class="bubble ${c.author}">
-      ${esc(c.comment)}
+    <div class="bubble ${c.author}" id="bub-${c.id}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+        <span>${esc(c.comment)}</span>
+        <button onclick="deleteComment(event,'${c.id}',${i})" style="background:none;border:none;cursor:pointer;opacity:0.3;font-size:12px;padding:0;line-height:1;flex-shrink:0" title="删除">×</button>
+      </div>
       <div class="bubble-who" style="color:${c.author==='cerberus'?'#721817':'#C9A84C'}">${c.author==='cerberus'?'Cerberus':'Annie'}</div>
     </div>`).join('');
   return `<div class="para-drawer">
@@ -620,7 +623,7 @@ async function togglePara(idx) {
   if (!curComments[para.paragraph_index]) {
     try {
       const res = await fetch(
-        `${URL_}/rest/v1/book_comments?select=*&book_id=eq.${para.id}&order=created_at.asc`,
+        `${URL_}/rest/v1/book_comments?select=id,book_id,paragraph_index,author,comment,created_at&book_id=eq.${para.id}&order=created_at.asc`,
         { headers: { apikey: KEY, Authorization: `Bearer ${KEY}` } }
       );
       curComments[para.paragraph_index] = await res.json();
@@ -647,7 +650,7 @@ function doCopy(event, idx) {
 function pickWho(event, val, paraIdx) {
   event.stopPropagation();
   who = val;
-  ['me','her'].forEach(w => {
+  ['cerberus','annie'].forEach(w => {
     document.querySelector(`#para-${paraIdx} .who-chip.${w}`)?.classList.toggle('on', w===val);
   });
 }
@@ -810,7 +813,23 @@ function copyExport() {
   });
 }
 
+async function deleteComment(event, id, paraIdx) {
+  event.stopPropagation();
+  if (!confirm('删除这条评论？')) return;
+  try {
+    await fetch(`${URL_}/rest/v1/book_comments?id=eq.${id}`, {
+      method: 'DELETE',
+      headers: { apikey: KEY, Authorization: `Bearer ${KEY}` }
+    });
+    const para = curParas[paraIdx];
+    curComments[para.paragraph_index] = curComments[para.paragraph_index].filter(c => c.id !== id);
+    document.getElementById('bub-' + id)?.remove();
+    if (!curComments[para.paragraph_index].length) {
+      document.getElementById('para-' + paraIdx)?.classList.remove('has-comment');
+    }
+  } catch(e) { alert('删除失败'); }
+}
+
 loadBooks();
-</script>
 </body>
 </html>
