@@ -242,12 +242,6 @@ async function openBook(title) {
 
    curComments = {};
 
-    curComments = {};
-    rawComments.forEach(c => {
-      if (!curComments[c.paragraph_index]) curComments[c.paragraph_index] = [];
-      curComments[c.paragraph_index].push(c);
-    });
-
     renderParas();
     // 滚动到上次进度
     const savedIdx = parseInt(localStorage.getItem('prog_' + title) || 0);
